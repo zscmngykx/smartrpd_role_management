@@ -9,7 +9,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const handleLogin = () => {
-    if (username === 'admin' && password === '123456') {
+    if (username === 'admin' && password === 'zxcvbnm') {
       localStorage.setItem('isLoggedIn', 'true');
       navigate('/roles');
     } else {
