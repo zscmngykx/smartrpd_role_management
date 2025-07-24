@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/RoleManagement.module.css";
+import profileImg from "../assets/logo.jpg";
 
 export default function RoleManagement() {
   const [activeTab, setActiveTab] = useState("home");
@@ -48,11 +49,7 @@ export default function RoleManagement() {
 
         {activeTab === "home" && (
           <section className={styles.home}>
-            <img
-              src="https://i.imgur.com/3yAfYbU.png"
-              alt="Mascot"
-              className={styles.homeImg}
-            />
+            <img src={profileImg} alt="HomePage" style={{ width: "150px" }} />
             <h1 style={{ fontSize: 32, fontWeight: 700 }}>
               Welcome to your workspace!
             </h1>
@@ -74,36 +71,38 @@ export default function RoleManagement() {
             </div>
 
             <div className={styles.tableWrapper}>
-              <table>
-                <thead>
-                  <tr>
-                    <th style={{ width: 60 }}>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th style={{ width: 150 }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((u) => (
-                    <tr key={u.id}>
-                      <td>{u.id}</td>
-                      <td>{u.username}</td>
-                      <td>{u.email}</td>
-                      <td>{u.role}</td>
-                      <td>
-                        <span className={`${styles.actionBtn} ${styles.edit}`}>
-                          Edit
-                        </span>
-                        <span className={`${styles.actionBtn} ${styles.del}`}>
-                          Delete
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th style={{ width: 150 }}>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {users.map((u) => (
+      <tr key={u.id}>  {/* ✅ key 保留，用于 React 识别 */}
+        <td>{u.name}</td>
+        <td>{u.role}</td>
+        <td>{u.email}</td>
+        <td>{u.phone}</td>
+        <td>
+          <span className={`${styles.actionBtn} ${styles.edit}`}>
+            Edit
+          </span>
+          <span className={`${styles.actionBtn} ${styles.del}`}>
+            Delete
+          </span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+</div>
+
           </section>
         )}
       </main>
