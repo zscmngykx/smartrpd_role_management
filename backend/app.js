@@ -9,14 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 3️⃣ 引入角色相关的路由文件（我们稍后写）
-const roleRoutes = require('./routes/roles');  // 路径要对！
+// 3️⃣ 引入路由文件
+const roleRoutes = require('./routes/roles');   // 角色接口
+const userRoutes = require('./routes/users');   // 🆕 用户接口
 
-// 4️⃣ 把 /roles 接口挂载到 roleRoutes 上
+// 4️⃣ 路由挂载
 app.use('/roles', roleRoutes);
+app.use('/users', userRoutes);   // 🆕 添加此行
 
 // 5️⃣ 启动服务器
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`✅ 角色管理系统后端已运行:http://localhost:${PORT}`);
+  console.log(`✅ 角色管理系统后端已运行: http://localhost:${PORT}`);
 });
