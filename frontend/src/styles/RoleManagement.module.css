@@ -173,3 +173,12 @@ tbody tr:hover {
 .del:hover {
   background: #f0625d;
 }
+
+.roleHeaderSelect {
+  padding: 8px;
+  margin: 0 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 14px;
+}
