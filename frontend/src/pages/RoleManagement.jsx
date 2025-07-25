@@ -1,23 +1,51 @@
 import React, { useEffect, useState } from "react";
 import styles from "../styles/RoleManagement.module.css";
 import profileImg from "../assets/logo.jpg";
+import AddUserModal from "../components/AddUserModal";
 
 export default function RoleManagement() {
   const [activeTab, setActiveTab] = useState("home");
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+  const [showModal, setShowModal] = useState(false); // 控制弹窗
 
-  useEffect(() => {
+  const fetchUsers = () => {
     fetch("http://localhost:3001/users")
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((err) => console.error("❌ 获取用户失败:", err));
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
-  // 筛选逻辑：用户名 + 角色
+  const handleAddUser = (newUser) => {
+    fetch("http://localhost:3001/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newUser)
+    })
+      .then((res) => {
+        if (res.ok) {
+          alert("The user has been successfully added!");
+          setShowModal(false);
+          fetchUsers();
+        } else {
+          alert("❌ 添加失败");
+        }
+      })
+      .catch((err) => {
+        console.error("❌ 添加用户出错:", err);
+        alert("❌ 添加失败");
+      });
+  };
+
   const filteredUsers = users.filter((user) => {
-    const matchName = user.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchName = user.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchRole = roleFilter === "" || user.role === roleFilter;
     return matchName && matchRole;
   });
@@ -27,14 +55,18 @@ export default function RoleManagement() {
       {/* 左侧导航栏 */}
       <aside className={styles.sidebar}>
         <div
-          className={`${styles.navItem} ${activeTab === "home" ? styles.active : ""}`}
+          className={`${styles.navItem} ${
+            activeTab === "home" ? styles.active : ""
+          }`}
           onClick={() => setActiveTab("home")}
         >
           <i className={`fas fa-house ${styles.navIcon}`}></i>
           <span>Home</span>
         </div>
         <div
-          className={`${styles.navItem} ${activeTab === "users" ? styles.active : ""}`}
+          className={`${styles.navItem} ${
+            activeTab === "users" ? styles.active : ""
+          }`}
           onClick={() => setActiveTab("users")}
         >
           <i className={`fas fa-users ${styles.navIcon}`}></i>
@@ -59,8 +91,12 @@ export default function RoleManagement() {
         {activeTab === "home" && (
           <section className={styles.home}>
             <img src={profileImg} alt="HomePage" style={{ width: "150px" }} />
-            <h1 style={{ fontSize: 32, fontWeight: 700 }}>Welcome to your workspace!</h1>
-            <p style={{ fontSize: 18, color: "#555" }}>Manage users efficiently.</p>
+            <h1 style={{ fontSize: 32, fontWeight: 700 }}>
+              Welcome to your workspace!
+            </h1>
+            <p style={{ fontSize: 18, color: "#555" }}>
+              Manage users efficiently.
+            </p>
           </section>
         )}
 
@@ -85,7 +121,12 @@ export default function RoleManagement() {
                 <option value="lab_technician">Lab Technician</option>
               </select>
 
-              <button className={styles.roleHeaderButton}>＋ Add User</button>
+              <button
+                className={styles.roleHeaderButton}
+                onClick={() => setShowModal(true)}
+              >
+                ＋ Add User
+              </button>
             </div>
 
             <div className={styles.tableWrapper}>
@@ -94,6 +135,7 @@ export default function RoleManagement() {
                   <tr>
                     <th>Name</th>
                     <th>Role</th>
+                    <th>Location</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th style={{ width: 150 }}>Actions</th>
@@ -104,11 +146,16 @@ export default function RoleManagement() {
                     <tr key={u.id}>
                       <td>{u.name}</td>
                       <td>{u.role}</td>
+                      <td>{u.location || "-"}</td>
                       <td>{u.email}</td>
                       <td>{u.phone}</td>
-                      <td>
-                        <span className={`${styles.actionBtn} ${styles.edit}`}>Edit</span>
-                        <span className={`${styles.actionBtn} ${styles.del}`}>Delete</span>
+                      <td className={styles.actionCell}>
+                        <div className={styles.iconGroup}>
+                          <i className={`fas fa-pen ${styles.iconEdit}`}></i>
+                          <i
+                            className={`fas fa-trash ${styles.iconDelete}`}
+                          ></i>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -116,6 +163,13 @@ export default function RoleManagement() {
               </table>
             </div>
           </section>
+        )}
+
+        {showModal && (
+          <AddUserModal
+            onClose={() => setShowModal(false)}
+            onSubmit={handleAddUser}
+          />
         )}
       </main>
     </div>
