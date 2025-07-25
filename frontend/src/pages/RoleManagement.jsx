@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import styles from "../styles/RoleManagement.module.css";
 import profileImg from "../assets/logo.jpg";
 import AddUserModal from "../components/AddUserModal";
+import EditUserModal from "../components/EditUserModal"; // ← 新增
 
 export default function RoleManagement() {
   const [activeTab, setActiveTab] = useState("home");
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
-  const [showModal, setShowModal] = useState(false); // 控制弹窗
+  const [showModal, setShowModal] = useState(false); // 控制“新增”弹窗
+  const [editingUser, setEditingUser] = useState(null); // 控制“编辑”弹窗
 
   const fetchUsers = () => {
     fetch("http://localhost:3001/users")
@@ -21,11 +23,12 @@ export default function RoleManagement() {
     fetchUsers();
   }, []);
 
+  // 新增用户
   const handleAddUser = (newUser) => {
     fetch("http://localhost:3001/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newUser)
+      body: JSON.stringify(newUser),
     })
       .then((res) => {
         if (res.ok) {
@@ -39,6 +42,49 @@ export default function RoleManagement() {
       .catch((err) => {
         console.error("❌ 添加用户出错:", err);
         alert("❌ 添加失败");
+      });
+  };
+
+  // 更新用户
+  const handleUpdateUser = (updatedUser) => {
+    fetch(`http://localhost:3001/users/${updatedUser.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedUser),
+    })
+      .then((res) => {
+        if (res.ok) {
+          alert("✅ User updated!");
+          setEditingUser(null);
+          fetchUsers();
+        } else {
+          alert("❌ 更新失败");
+        }
+      })
+      .catch((err) => {
+        console.error("❌ 更新用户出错:", err);
+        alert("❌ 更新失败");
+      });
+  };
+
+  // 删除用户
+  const handleDeleteUser = (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+    fetch(`http://localhost:3001/users/${id}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (res.ok) {
+          alert("✅ User deleted!");
+          fetchUsers();
+        } else {
+          alert("❌ 删除失败");
+        }
+      })
+      .catch((err) => {
+        console.error("❌ 删除用户出错:", err);
+        alert("❌ 删除失败");
       });
   };
 
@@ -151,9 +197,13 @@ export default function RoleManagement() {
                       <td>{u.phone}</td>
                       <td className={styles.actionCell}>
                         <div className={styles.iconGroup}>
-                          <i className={`fas fa-pen ${styles.iconEdit}`}></i>
+                          <i
+                            className={`fas fa-pen ${styles.iconEdit}`}
+                            onClick={() => setEditingUser(u)} // ← 编辑
+                          ></i>
                           <i
                             className={`fas fa-trash ${styles.iconDelete}`}
+                            onClick={() => handleDeleteUser(u.id)} // ← 删除
                           ></i>
                         </div>
                       </td>
@@ -165,10 +215,20 @@ export default function RoleManagement() {
           </section>
         )}
 
+        {/* 新增用户弹窗 */}
         {showModal && (
           <AddUserModal
             onClose={() => setShowModal(false)}
             onSubmit={handleAddUser}
+          />
+        )}
+
+        {/* 编辑用户弹窗 */}
+        {editingUser && (
+          <EditUserModal
+            user={editingUser}
+            onClose={() => setEditingUser(null)}
+            onSubmit={handleUpdateUser}
           />
         )}
       </main>
