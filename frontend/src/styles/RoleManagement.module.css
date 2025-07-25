@@ -131,8 +131,18 @@ thead {
   background: rgba(211, 211, 211, 1);
 }
 
+/* 原来放在 thead 或 tr 上的，全部挪进 th */
+
 thead th {
-  border-right: 2.5px solid #555;
+  
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  background: rgba(211,211,211,1);   /* ✅ 背景色放这里 */
+  /* border-right: 2.5px solid #555;     */
+  /* 其他像 padding / font-weight 等都可以放进来 */
+  box-shadow: inset -1px 0 0 #555;
 }
 
 thead th:last-child,
@@ -308,4 +318,15 @@ tbody tr:hover {
 
 .modalButtons button:last-of-type:hover {
   background-color: #cccccc;
+}
+
+/* 👉 你的其他样式保持不变，只在 thead th 里加这两行 */
+thead th {
+  position: sticky;   /* 关键 1：让 th 变成 sticky */
+  top: 0;             /* 关键 2：吸在容器顶部 */
+}
+
+/* 可选：给表头设背景，滚动时不会透出下面的行 */
+thead {
+  background: rgba(211, 211, 211, 1);
 }
