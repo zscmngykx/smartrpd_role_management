@@ -1,0 +1,216 @@
+{
+  "info": {
+    "name": "Role & User Management Microservice Test",
+    "_postman_id": "faked-id-001",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+        {
+      "name": "Add User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Alice\", \"email\": \"alice@example.com\", \"phone\": \"12345678\", \"location\": \"Clinic A\", \"role\": \"Clinician\"}"
+        },
+        "url": {
+          "raw": "http://localhost:3001/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Update User",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Alice Updated\", \"email\": \"alice.new@example.com\", \"phone\": \"87654321\", \"location\": \"Clinic B\", \"role\": \"Manager\"}"
+        },
+        "url": {
+          "raw": "http://localhost:3001/users/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "users",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete Role",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/roles/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "roles",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update Role",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Manager\", \"description\": \"Oversees system\"}"
+        },
+        "url": {
+          "raw": "http://localhost:3001/roles/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "roles",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Role By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/roles/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "roles",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Add Role",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Clinician\", \"description\": \"Handles clinical tasks\"}"
+        },
+        "url": {
+          "raw": "http://localhost:3001/roles",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "roles"
+          ]
+        }
+      }
+    },
+
+
+    {
+      "name": "Get All Users",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+        {
+      "name": "Get All Roles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/roles",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "roles"
+          ]
+        }
+      }
+    },
+
+    {
+      "name": "Delete User",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3001/users/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3001",
+          "path": [
+            "users",
+            "1"
+          ]
+        }
+      }
+    }
+  ]
+}
