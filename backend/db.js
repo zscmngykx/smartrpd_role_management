@@ -3,18 +3,18 @@
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '740217',           // ← 根据你的实际密码填写，如果没有密码就留空
-  database: 'personnel'   // ← 这是你刚刚建的数据库名
+  host: '34.127.75.233',         // ← your cloud database IP
+  user: 'root',                  // ← cloud MySQL username
+  password: '740217',            // ← cloud MySQL password
+  database: 'personnel'          // ← database name
 });
 
-// 尝试连接数据库
+// Try to connect to the database
 db.connect((err) => {
   if (err) {
-    console.error('❌ 无法连接数据库:', err);
+    console.error('❌ Failed to connect to MySQL database:', err);
   } else {
-    console.log('✅ 成功连接到 MySQL 数据库 personnel');
+    console.log('✅ Successfully connected to MySQL database: personnel');
   }
 });
 
