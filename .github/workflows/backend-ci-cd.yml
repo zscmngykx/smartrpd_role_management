@@ -1,0 +1,94 @@
+name: Backend Role Service CI/CD
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '__tests__/**'
+    branches: [main]
+
+jobs:
+  setup:
+    name: Setup Node.js
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+  unit-test:
+    name: Run Backend Unit Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test
+
+  integration-test:
+    name: Run Integration Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm install
+      - run: npx jest __tests__
+
+  codeql:
+    name: Security Analysis with CodeQL
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v2
+
+  dockerize:
+    name: Docker Build
+    needs: [unit-test, integration-test, codeql]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker build -t role-backend ./backend
+
+  deploy:
+    name: Deploy to GCP Backend VM
+    needs: dockerize
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to GCP and deploy backend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.BACKEND_VM_IP }}
+          username: ${{ secrets.BACKEND_VM_USER }}
+          key: ${{ secrets.BACKEND_VM_SSH_KEY }}
+          script: |
+            cd ~/role-management-backend
+            git pull origin main
+            docker stop role-backend || true
+            docker rm role-backend || true
+            docker build -t role-backend ./backend
+            docker run -d --name role-backend -p 3001:3001 role-backend
