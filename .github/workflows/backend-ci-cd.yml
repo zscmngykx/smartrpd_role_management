@@ -2,9 +2,6 @@ name: Backend Role Service CI/CD
 
 on:
   push:
-    paths:
-      - 'backend/**'
-      - '__tests__/**'
     branches: [main]
 
 jobs:
