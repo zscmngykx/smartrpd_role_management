@@ -18,9 +18,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
-
 
       - name: Install dependencies
         run: npm install
@@ -37,30 +36,31 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm test
 
   integration-test:
-    name: Run Postman Integration Tests
+    name: Run Integration Tests
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-            node-version: 18
+    - name: Install dependencies
+      run: npm install
+      working-directory: backend
 
-      - name: Install Newman (Postman CLI)
-        run: npm install -g newman
+    - name: Start backend server
+      run: nohup node app.js & sleep 5
+      working-directory: backend
 
-      - name: Run Postman Tests with Newman
-        run: |
-            newman run postman/role_user_microservice.postman_collection.json
-
+    - name: Run Postman tests with Newman
+      run: npx newman run postman/role_user_microservice.postman_collection.json
 
   codeql:
     name: Security Analysis with CodeQL
