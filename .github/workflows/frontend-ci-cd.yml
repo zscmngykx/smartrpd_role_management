@@ -1,0 +1,78 @@
+name: Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  setup:
+    name: Setup Node.js
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm install
+
+  unit-test:
+    name: Run Frontend Unit Tests
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watchAll=false
+
+  codeql:
+    name: Security Analysis with CodeQL
+    needs: setup
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v2
+
+  dockerize:
+    name: Docker Build Frontend
+    needs: [unit-test, codeql]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: docker build -t role-frontend ./frontend
+
+  deploy:
+    name: Deploy to GCP Frontend VM
+    needs: dockerize
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH to GCP and deploy frontend
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.FRONTEND_VM_IP }}
+          username: ${{ secrets.FRONTEND_VM_USER }}
+          key: ${{ secrets.FRONTEND_VM_SSH_KEY }}
+          script: |
+            cd ~/role-management-frontend
+            git pull origin main
+            docker stop role-frontend || true
+            docker rm role-frontend || true
+            docker build -t role-frontend ./frontend
+            docker run -d --name role-frontend -p 80:80 role-frontend
