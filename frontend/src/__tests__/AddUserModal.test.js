@@ -6,3 +6,4 @@ test('renders AddUserModal UI elements', () => {
   expect(screen.getByPlaceholderText(/name/i)).toBeInTheDocument();
   expect(screen.getByText(/submit/i)).toBeInTheDocument();
 });
+// 
