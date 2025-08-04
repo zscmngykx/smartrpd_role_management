@@ -3,7 +3,7 @@
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
-  host: '34.127.75.233',         // ← your cloud database IP
+  host: 'localhost',          // ← your cloud database IP
   user: 'root',                  // ← cloud MySQL username
   password: '740217',            // ← cloud MySQL password
   database: 'personnel'          // ← database name
