@@ -60,7 +60,13 @@ jobs:
       working-directory: backend
 
     - name: Run Postman tests with Newman
-      run: npx newman run postman/role_user_microservice.postman_collection.json
+      run: |
+          echo "Running Postman tests with newman..."
+          newman run postman/smartrpd.postman_collection.json \
+            -e postman/smartrpd-env.postman_environment.json \
+            --reporters cli \
+            --export-cookie-jar ./cookies.json \
+            --insecure
 
   codeql:
     name: Security Analysis with CodeQL

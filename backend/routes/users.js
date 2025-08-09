@@ -2,6 +2,44 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+// 登录接口：验证用户名和密码是否匹配
+router.post('/auth/login', (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Missing email or password' });
+  }
+
+  const sql = `
+    SELECT users.id, users.name, users.email, users.location, roles.name AS role
+    FROM users
+    LEFT JOIN user_roles ON users.id = user_roles.user_id
+    LEFT JOIN roles ON user_roles.role_id = roles.id
+    WHERE users.email = ? AND users.password = ?  
+    LIMIT 1
+  `;
+
+  db.query(sql, [email, password], (err, results) => {
+    if (err) {
+      console.error('❌ 登录查询失败:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const user = results[0];
+
+    // 这里可以生成 token，或直接返回用户信息
+    res.status(200).json({
+      message: '✅ Login successful',
+      user,
+      token: 'mock-token-abc123'  // 可以后续替换成 JWT
+    });
+  });
+});
+
 // 🟢 获取所有用户及其角色及位置
 router.get('/', (req, res) => {
   const sql = `

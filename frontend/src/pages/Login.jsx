@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import profileImage from '../assets/profile.png'; // 👈 请确保图片存在
+import profileImage from '../assets/profile.png'; 
 
 const Login = () => {
   const navigate = useNavigate();
