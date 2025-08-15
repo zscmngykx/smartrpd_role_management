@@ -24,9 +24,55 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+  lint:
+    name: Lint
+    needs: setup
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install deps
+        run: npm ci || npm install
+
+      - name: Install ESLint deps
+        run: npm i -D eslint@^9 @eslint/js@^9 || true
+
+      - name: Disable ESLint matchers
+        run: |
+          echo "::remove-matcher owner=eslint-compact::" || true
+          echo "::remove-matcher owner=eslint-stylish::" || true
+
+      - name: Run ESLint to JSON
+        env:
+          REPORT_PATH: ${{ github.workspace }}/backend/reports/eslint-report.json
+        run: |
+          mkdir -p "$(dirname "$REPORT_PATH")"
+          npx eslint . --ext .js,.jsx,.ts,.tsx --format json -o "$REPORT_PATH" || true
+          [ -s "$REPORT_PATH" ] || echo "[]" > "$REPORT_PATH"
+
+      - name: Lint summary
+        env:
+          REPORT_PATH: ${{ github.workspace }}/backend/reports/eslint-report.json
+        run: |
+          node -e "const fs=require('fs');let a=[];try{a=JSON.parse(fs.readFileSync(process.env.REPORT_PATH,'utf8'))}catch{};const e=a.reduce((s,f)=>s+f.errorCount,0);const w=a.reduce((s,f)=>s+f.warningCount,0);const fct=a.length;console.log(`ESLint completed · files: ${fct}, errors: ${e}, warnings: ${w}`);"
+
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report-backend
+          path: backend/reports/eslint-report.json
+
   unit-test:
     name: Run Backend Unit Tests
-    needs: setup
+    needs: [setup, lint]
     runs-on: ubuntu-latest
     defaults:
       run:
