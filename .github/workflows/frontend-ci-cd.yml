@@ -21,7 +21,7 @@ jobs:
       - run: npm install
 
   lint:
-    name: Lint (report only)
+    name: Lint
     needs: setup
     runs-on: ubuntu-latest
     defaults:
@@ -34,26 +34,39 @@ jobs:
           node-version: 18
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+
       - name: Install deps
         run: npm ci || npm install
+
       - name: Install ESLint deps
         run: npm i -D eslint@^9 @eslint/js@^9 || true
-      # 防止控制台输出被解析成注解
+
+      # 避免控制台被解析成 annotations
       - name: Disable ESLint matchers
         run: |
           echo "::remove-matcher owner=eslint-compact::" || true
           echo "::remove-matcher owner=eslint-stylish::" || true
-      # 真实运行，但结果写文件；命令退出码不影响流水线
+
+      # 运行并输出到文件；始终生成报告
       - name: Run ESLint to JSON
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json -o eslint-report.json || true
-      - name: Lint summary
+        env:
+          REPORT_PATH: ${{ github.workspace }}/frontend/reports/eslint-report.json
         run: |
-          node -e "const fs=require('fs');let a=[];try{a=JSON.parse(fs.readFileSync('eslint-report.json','utf8'))}catch{};const e=a.reduce((s,f)=>s+f.errorCount,0);const w=a.reduce((s,f)=>s+f.warningCount,0);console.log(`ESLint completed: ${e} errors, ${w} warnings.`);"
-      - name: Upload ESLint artifact
+          mkdir -p "$(dirname "$REPORT_PATH")"
+          npx eslint . --ext .js,.jsx,.ts,.tsx --format json -o "$REPORT_PATH" || true
+          [ -s "$REPORT_PATH" ] || echo "[]" > "$REPORT_PATH"
+
+      - name: Lint summary
+        env:
+          REPORT_PATH: ${{ github.workspace }}/frontend/reports/eslint-report.json
+        run: |
+          node -e "const fs=require('fs');let a=[];try{a=JSON.parse(fs.readFileSync(process.env.REPORT_PATH,'utf8'))}catch{};const e=a.reduce((s,f)=>s+f.errorCount,0);const w=a.reduce((s,f)=>s+f.warningCount,0);const fct=a.length;console.log(`ESLint completed · files: ${fct}, errors: ${e}, warnings: ${w}`);"
+
+      - name: Upload ESLint report
         uses: actions/upload-artifact@v4
         with:
           name: eslint-report-frontend
-          path: frontend/eslint-report.json
+          path: frontend/reports/eslint-report.json
 
   unit-test:
     name: Run Frontend Unit Tests
