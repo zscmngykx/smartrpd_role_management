@@ -72,7 +72,7 @@ jobs:
 
   unit-test:
     name: Run Backend Unit Tests
-    needs: [setup, lint]
+    needs: lint
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -89,7 +89,7 @@ jobs:
 
   integration-test:
     name: Run Integration Tests
-    needs: setup
+    needs: lint
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
