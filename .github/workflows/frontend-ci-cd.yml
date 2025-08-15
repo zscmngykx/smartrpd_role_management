@@ -16,12 +16,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm install
 
-  unit-test:
-    name: Run Frontend Unit Tests
+  lint:
+    name: Lint (report only)
     needs: setup
     runs-on: ubuntu-latest
     defaults:
@@ -32,7 +32,42 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install deps
+        run: npm ci || npm install
+      - name: Install ESLint deps
+        run: npm i -D eslint@^9 @eslint/js@^9 || true
+      # 防止控制台输出被解析成注解
+      - name: Disable ESLint matchers
+        run: |
+          echo "::remove-matcher owner=eslint-compact::" || true
+          echo "::remove-matcher owner=eslint-stylish::" || true
+      # 真实运行，但结果写文件；命令退出码不影响流水线
+      - name: Run ESLint to JSON
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx --format json -o eslint-report.json || true
+      - name: Lint summary
+        run: |
+          node -e "const fs=require('fs');let a=[];try{a=JSON.parse(fs.readFileSync('eslint-report.json','utf8'))}catch{};const e=a.reduce((s,f)=>s+f.errorCount,0);const w=a.reduce((s,f)=>s+f.warningCount,0);console.log(`ESLint completed: ${e} errors, ${w} warnings.`);"
+      - name: Upload ESLint artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-report-frontend
+          path: frontend/eslint-report.json
+
+  unit-test:
+    name: Run Frontend Unit Tests
+    needs: [setup, lint]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm test -- --watchAll=false
